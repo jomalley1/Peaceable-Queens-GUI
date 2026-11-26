@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Peaceable Queens Companion</title>
+  <style>
+
+:root {
+  --bg: #f3eee5;
+  --bg-2: #fffaf3;
+  --ink: #1c1916;
+  --muted: #6b645c;
+  --line: #d9d1c5;
+  --accent: #215c48;
+  --accent-2: #173e31;
+  --light-sq: #f3e6cc;
+  --dark-sq: #c9ae78;
+  --cleared: #ebe4d6;
+  --white-fill: #fbf8f2;
+  --white-ink: #1c1916;
+  --black-fill: #1c1916;
+  --black-ink: #fbf8f2;
+  --danger: #a33a2f;
+  --danger-bg: #f4d6d1;
+  --ok: #215c48;
+  --shadow: 0 1px 2px rgba(28,25,22,.06);
+  --radius: 12px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161411;
+    --bg-2: #201c18;
+    --ink: #f3eee5;
+    --muted: #a8a093;
+    --line: #3a342c;
+    --accent: #8fbfa8;
+    --accent-2: #c5e4d5;
+    --light-sq: #3a3226;
+    --dark-sq: #5c4c32;
+    --cleared: #2a2621;
+    --white-fill: #f3eee5;
+    --white-ink: #161411;
+    --black-fill: #0e0c0a;
+    --black-ink: #f3eee5;
+    --danger: #e07a70;
+    --danger-bg: #4a2420;
+    --ok: #8fbfa8;
+    --shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+}
+a { color: var(--accent); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 80px; }
+header.hero h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+header.hero p { margin: 0 0 8px; color: var(--muted); max-width: 62ch; }
+header.hero .links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; font-size: 0.95rem; }
+section { margin-top: 36px; }
+section h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.45rem;
+  margin: 0 0 8px;
+}
+section .lede { color: var(--muted); margin: 0 0 16px; }
+.toolbar, .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+label.field { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--muted); }
+select, button, textarea, input[type="text"] {
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+select, button {
+  height: 36px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--ink); }
+button.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+button.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+@media (prefers-color-scheme: dark) {
+  button.primary { color: #161411; }
+}
+.seg { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; height: 36px; }
+.seg button {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  border-right: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--ink); color: var(--bg); }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
+}
+.stat {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+.stat .k { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.stat .v { font-family: var(--serif); font-size: 1.5rem; line-height: 1.2; margin-top: 2px; }
+.stat .d { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+.stat.ok .v { color: var(--ok); }
+.stat.bad .v { color: var(--danger); }
+.board-shell {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  width: min(100%, 740px);
+}
+#board {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  user-select: none;
+  touch-action: manipulation;
+  background: var(--ink);
+}
+#board .sq {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  cursor: pointer;
+}
+#board .sq.lt { background: var(--light-sq); }
+#board .sq.dk { background: var(--dark-sq); }
+#board .sq.cleared { background: var(--cleared); }
+#board .sq.conflict { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+#board .piece {
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+#board .piece.W { background: var(--white-fill); color: var(--white-ink); box-shadow: 0 0 0 1px rgba(28,25,22,.35); }
+#board .piece.B { background: var(--black-fill); color: var(--black-ink); box-shadow: 0 0 0 1px rgba(28,25,22,.2); }
+#board .piece.ghost { opacity: 0.92; }
+.hint { font-size: 0.9rem; color: var(--muted); margin: 10px 0 0; }
+.io {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 800px) { .io { grid-template-columns: 1fr; } }
+textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  resize: vertical;
+}
+pre.export {
+  margin: 0;
+  min-height: 200px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.4;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  white-space: pre;
+}
+.msg { min-height: 1.3em; font-size: 0.9rem; margin: 8px 0 0; }
+.msg.bad { color: var(--danger); }
+.msg.ok { color: var(--ok); }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); }
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr.current { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+tr:last-child td { border-bottom: 0; }
+.pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.pill.proven { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.caption { color: var(--muted); font-size: 0.88rem; margin-top: 10px; }
+footer { margin-top: 48px; color: var(--muted); font-size: 0.88rem; }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>Peaceable Queens Companion</h1>
+      <p>Two equal armies of queens on an n×n board, with no queen attacking anyone on the other side. This is a separate companion board: import and export layouts, check them against OEIS A250000, and load verified record attempts. The original GUI is unchanged.</p>
+      <div class="links">
+        <a href="../build/">Your original board</a>
+        <a href="https://oeis.org/A250000">OEIS A250000</a>
+        <a href="https://mathworld.wolfram.com/PeaceableQueensProblem.html">MathWorld</a>
+      </div>
+    </header>
+
+    <section id="board-section">
+      <h2>Board</h2>
+      <p class="lede">Choose a size up to 50×50. In auto-black mode, click to place or remove white queens; every unattacked square counts as black. In manual mode, place both armies yourself.</p>
+
+      <div class="toolbar">
+        <label class="field">Board size
+          <select id="size"></select>
+        </label>
+        <label class="field">Mode
+          <div class="seg" id="mode-seg" role="group" aria-label="Mode">
+            <button type="button" data-mode="auto" class="on">Auto-black</button>
+            <button type="button" data-mode="manual">Manual</button>
+          </div>
+        </label>
+        <label class="field" id="tool-wrap" style="display:none">Place
+          <div class="seg" id="tool-seg" role="group" aria-label="Placement tool">
+            <button type="button" data-tool="W" class="on">White</button>
+            <button type="button" data-tool="B">Black</button>
+            <button type="button" data-tool="empty">Empty</button>
+          </div>
+        </label>
+        <button type="button" id="undo">Undo</button>
+        <button type="button" id="redo">Redo</button>
+        <button type="button" id="clear">Clear</button>
+      </div>
+
+      <div id="stats" class="stats"></div>
+      <div class="board-shell">
+        <div id="board" role="grid" aria-label="Peaceable queens board"></div>
+      </div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <section id="io-section">
+      <h2>Import and export</h2>
+      <p class="lede">Paste a text grid of W, B, and . characters (Q, w, and b are also accepted, and spaces are ignored), or a compact list such as <code>n=8</code> plus lines like <code>W 1 2</code> or <code>W: (1,2) (1,3)</code> or algebraic <code>W: a8, b8</code>.</p>
+      <div class="io">
+        <div>
+          <div class="row">
+            <button type="button" class="primary" id="load-import">Load onto board</button>
+          </div>
+          <textarea id="import-text" placeholder="....BB..&#10;WW......&#10;or&#10;n=8&#10;W 1 1&#10;B 4 5"></textarea>
+          <div class="msg" id="import-msg"></div>
+        </div>
+        <div>
+          <div class="row">
+            <button type="button" id="copy-export">Copy grid</button>
+          </div>
+          <pre class="export" id="export-pre"></pre>
+          <div class="msg" id="copy-msg"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="records-section">
+      <h2>Known best values</h2>
+      <p class="lede">Exact values a(1) through a(20) are from OEIS A250000, including the November 2026 proofs for n = 16 to 20. For n = 21 to 50 the figures are the best-known lower bounds from Ainley’s construction, ⌊7n²/48⌋ (n = 27 was first listed as 105 and later improved to 106).</p>
+      <div class="row">
+        <div class="seg" id="rec-seg" role="group" aria-label="Record table range">
+          <button type="button" data-range="proven" class="on">Proven 1–20</button>
+          <button type="button" data-range="mid">21–30</button>
+          <button type="button" data-range="high">31–50</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="record-table"></div>
+      <p class="caption">The current board is highlighted when its size falls in the selected range. Gap is this board’s army size minus the listed value.</p>
+    </section>
+
+    <section id="gallery-section">
+      <h2>Record attempts</h2>
+      <p class="lede">Verified layouts from the current search, one per board size. Each was checked so that no white queen and black queen share a row, column, or diagonal. Load any of them onto the board.</p>
+      <div class="row">
+        <div class="seg" id="gal-seg" role="group" aria-label="Gallery filter">
+          <button type="button" data-gal="all" class="on">All</button>
+          <button type="button" data-gal="proven">Proven n = 3–20</button>
+          <button type="button" data-gal="open">Open n = 21–40</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="gallery-table"></div>
+    </section>
+
+    <footer>
+      A companion to the original Peaceable Queens GUI, which is left untouched at <a href="../build/">../build/</a>. Record values follow <a href="https://oeis.org/A250000">OEIS A250000</a>.
+    </footer>
+  </div>
+  <script>
+window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","grid":"..B\nW..\n..B"},{"id":"n4","n":4,"w":2,"b":2,"source":"Verified search","grid":"W...\n..B.\n.B..\n...W"},{"id":"n5","n":5,"w":4,"b":4,"source":"Verified search","grid":"B...B\n..W..\n.W.W.\n..W..\nB...B"},{"id":"n6","n":6,"w":5,"b":5,"source":"Verified search","grid":"..W...\nW..W..\n.....B\nW.W...\n....BB\n.B...B"},{"id":"n7","n":7,"w":7,"b":7,"source":"Verified search","grid":".BB....\n..BB...\n.....WW\nB......\nBB.....\n....WW.\n....WWW"},{"id":"n8","n":8,"w":9,"b":9,"source":"Verified search","grid":"B.BB....\n.B.B....\n......WW\nB..B....\nBB......\n....W.W.\n....WW.W\n.....WW."},{"id":"n9","n":9,"w":12,"b":12,"source":"Verified search","grid":"..W.W.W.W\nB........\n.B.B.B.B.\nB........\n..W.W.W.W\nB........\n.B.B.B.B.\nB........\n..W.W.W.W"},{"id":"n10","n":10,"w":14,"b":14,"source":"Verified search","grid":"B...BB..B.\n....BB...B\n....B...B.\n.....B...B\nB...B...B.\n..W...W...\n.W.W...W..\n..W...W...\n.W.W..WW..\n..W...WW.."},{"id":"n11","n":11,"w":17,"b":18,"source":"Verified search","grid":"BB....BB...\nBBB...BB...\nBBB....B...\nBBB........\n.BB........\n........WW.\n........WWW\n...W.....WW\n...WW.....W\n...WWW.....\n...WWW....."},{"id":"n12","n":12,"w":21,"b":21,"source":"Verified search","grid":"...BB.....B.\n...BB....B.B\n...BB...B.BB\n...B.....BBB\n........BBB.\n........BB..\n.WW..W......\nWWW.........\nWW.....W....\nW.W...WW....\n.W...WWW....\nW....WWW...."},{"id":"n13","n":13,"w":24,"b":24,"source":"Verified search","grid":"B.....BBB....\nBB....BBB....\nBBB....BB....\nBBB..........\nBBB..........\n.BB..........\n..B...B......\n.........WWW.\n...W.....WWWW\n....W.....WWW\n...WWW.....WW\n...WWW......W\n...WWW......."},{"id":"n14","n":14,"w":29,"b":28,"source":"Verified search","grid":"..........WWWW\n.........WWWWW\n........WWWWW.\n.......WWWWW..\nBBBBB.........\nBBBBB.........\nBBBB..........\nBBB...........\n...........WWW\n..........WWWW\n...........WWW\n....BBB.......\n...BBBB.......\n..BBBB........"},{"id":"n15","n":15,"w":32,"b":32,"source":"Verified search","grid":"..........WWWW.\n.........WWWW.W\n........WWWW.W.\n.......WWWW.W..\n.......WWW.W...\nBBBBB..........\nBBBB...........\nBBB............\nBB....B........\n...........WWWW\n..........WWWWW\n...B.BB........\n..B.BBB........\n.B.BBBB........\nB.BBBB........."},{"id":"n16","n":16,"w":37,"b":37,"source":"Verified search","grid":"WW.......WWWW...\nWWW......WWWW...\nWWWW.....WWWW...\nWWWW......WW....\nWWWW............\n.WWW............\n..WW............\n...W............\n.............BB.\n.............BBB\n.....B.......BBB\n....BBB......BBB\n....BBBB......BB\n....BBBBB......B\n....BBBBB.......\n....BBBBB......."},{"id":"n17","n":17,"w":42,"b":42,"source":"Verified search","grid":"..........WWWWW..\n.........WWWWW...\n........WWWWW....\n........WWWW.....\nBBBBB............\nBBBBB............\nBBBB.............\n..............WWW\n.............WWWW\n............WWWWW\n...........WWWWWW\n............WWWWW\n...BBBBB.........\n..BBBBBB.........\n.BBBBBB..........\nBBBBBB...........\nBBBBB............"},{"id":"n18","n":18,"w":47,"b":47,"source":"Verified search","grid":"WWWWWW............\n.WWWWWW...........\n..WWWWWW..........\n...WWWWWW.........\n....WWWWW.........\n...........B.BBBBB\n............BBBBBB\n.............BBBBB\n..............BBBB\n...............BBB\nWWWW..............\nWWWWW.............\nWWWW.W............\nWWW.W.............\n.........BBBBB....\n.........BBBBBB...\n..........BBBBBB..\n...........BBBBBB."},{"id":"n19","n":19,"w":52,"b":52,"source":"Verified search","grid":"..........WWWWWWW..\n.........WWWWWWW...\n.........WWWWWW....\nBBBB...............\nBBBBB..............\nBBBBB..............\nBBBB...............\n.........W......WWW\n...............WWWW\n..............WWWWW\n.............WWWWWW\n............WWWWWWW\n.............WWWWWW\n....BBBBB..........\n...BBBBBB..........\n..BBBBBB...........\n.BBBBBB............\nBBBBBB.............\nBBBBB.............."},{"id":"n20","n":20,"w":58,"b":58,"source":"Verified search","grid":"..BBBBBB............\n...BBBBBB...........\n....BBBBBB..........\n.....BBBBBB.........\n......BBBBB.........\n...............WWWWW\n..............WWWWWW\n...............WWWWW\n................WWWW\nBBBB................\nBBBBB...............\nBBBBBB..............\nBBBBBBB.............\nBBBBBBB.............\n...........WWWWW....\n...........WWWWWW...\n...........WWWWWWW..\n............WWWWWWW.\n.............WWWWWWW\n..............WWWWWW"},{"id":"n21","n":21,"w":64,"b":64,"source":"Verified search","grid":"W...........WWWWW....\nWW..........WWWWW....\nWWW.........WWWWW....\nWWWW........WWWWW....\nWWWWW.......WWWWW....\nWWWWWW.......WWW.....\n.WWWWW........W......\n..WWWW...............\n...WWW...............\n....WW...............\n...........B.....B...\n.................BB..\n.................BBB.\n.................BBBB\n.......BB........BBBB\n......BBBB.......BBBB\n......BBBBB......BBBB\n......BBBBBB......BBB\n......BBBBBB.......BB\n......BBBBBB........B\n......BBBBBB........."},{"id":"n22","n":22,"w":70,"b":70,"source":"Verified search","grid":"WWWWWWWW..............\n.WWWWWWWW.............\n..WWWWWWWW............\n...WWWWWWWW...........\n....WWWWWWW...........\n.....WWWWWW...........\n................BBBBBB\n...............BBBBBBB\n................BBBBBB\n.................BBBBB\n..................BBBB\n...................BBB\nWWWWW.................\nWWWWWW................\nWWWWWWW...............\nWWWWWWW...............\n...........BBBBB......\n...........BBBBBB.....\n...........BBBBBBB....\n............BBBBBBB...\n.............BBBBBBB..\n..............BBBBBBB."},{"id":"n23","n":23,"w":77,"b":77,"source":"Verified search","grid":"......BBBBBB..........B\n......BBBBBB.........B.\n......BBBBBB........B.B\n......BBBBBB.......B.BB\n......BBBBB.......B.BBB\n......BBBB.........BBBB\n......BBB.........BBBBB\n.......B..........BBBBB\n..................BBBBB\n..................BBBB.\n..................BBB..\n...........B......BB...\n...WWW.................\n..WWWW.................\n.WWWWW.................\nWWWWWW.................\nWWWWWW.........W.......\nWWWWW.........WWW......\nWWWW.W.......WWWWW.....\nWWW.W.......WWWWWW.....\nWW.W........WWWWWW.....\nW.W.........WWWWWW.....\n.W..........WWWWWW....."},{"id":"n24","n":24,"w":84,"b":84,"source":"Verified search","grid":".W..........WWWWWW......\nW.W.........WWWWWW......\nWW.W........WWWWWW......\nWWW.W.......WWWWWW......\nWWWW.W.......WWWWW......\nWWWWW.........WWWW......\nWWWWWW.........WWW......\nWWWWWW..........W.......\n.WWWWW..................\n..WWWW..................\n...WWW..................\n....WW......W...........\n..................BBB...\n..................BBBB..\n..................BBBBB.\n..................BBBBBB\n........B.........BBBBBB\n.......BBB.........BBBBB\n......BBBBB.......B.BBBB\n......BBBBBB.......B.BBB\n......BBBBBB........B.BB\n......BBBBBB.........B.B\n......BBBBBB..........B.\n......BBBBBB...........B"},{"id":"n25","n":25,"w":91,"b":91,"source":"Verified search","grid":"BBBBBBBB.................\nBBBBBBBBB................\n.BBBBBBBBB...............\n..BBBBBBBBB..............\n...BBBBBBBBB.............\n....BBBBBBBB.............\n..................WWWWWWW\n.................WWWWWWWW\n................WWWWWWWWW\n.................WWWWWWWW\n..................WWWWWWW\n...................WWWWWW\n....................WWWWW\nBBBBB....................\nBBBBBB...................\nBBBBBBB..................\nBBBBBBBB.................\nBBBBBBB..................\nBBBBBB...................\n............WWWWWW.......\n............WWWWWWW......\n.............WWWWWWW.....\n..............WWWWWWW....\n...............WWWWWWW...\n................WWWWWWW.."},{"id":"n26","n":26,"w":98,"b":99,"source":"Verified search","grid":"................BBBBBBBB..\n...............BBBBBBBB...\n..............BBBBBBBB....\n.............BBBBBBBB.....\n............BBBBBBBB......\n............BBBBBBB.......\nWWWWWW....................\nWWWWWWW...................\nWWWWWWWW..................\nWWWWWWW...................\nWWWWWW....................\nWWWWW.....................\n.....................BBBBB\n....................BBBBBB\n...................BBBBBBB\n..................BBBBBBBB\n.................BBBBBBBBB\n.................BBBBBBBBB\n..................BBBBBBBB\n.....WWWWWWW..............\n....WWWWWWWW..............\n...WWWWWWWWW..............\n..WWWWWWWWW...............\n.WWWWWWWWW................\nWWWWWWWWW.................\nWWWWWWWW.................."},{"id":"n27","n":27,"w":106,"b":106,"source":"Verified search","grid":"...................BBBBBBBB\n..................BBBBBBBB.\n.................BBBBBBBB.B\n................BBBBBBBB.B.\n...............BBBBBBBB.B..\n..............BBBBBBBB.B...\n..............BBBBBBB.B....\n..............BBBBBB.B.....\nWWWWWWWWW..................\nWWWWWWWWWW.................\nWWWWWWWWW..................\nWWWWWWWW...................\nWWWWWWW....................\nWWWWWW.....................\nWWWWW........W.............\n......................BBBBB\n.....................BBBBBB\n....................BBBBBBB\n...................BBBBBBBB\n....................BBBBBBB\n.....................BBBBBB\n......W.WWWWWW.............\n.....W.WWWWWWW.............\n....W.WWWWWWWW.............\n...W.WWWWWWWW..............\n..W.WWWWWWWW...............\n.W.WWWWWWWW................"},{"id":"n28","n":28,"w":114,"b":114,"source":"Verified search","grid":"BBBBBBBBB...................\nBBBBBBBBBB..................\n.BBBBBBBBBB.................\n..BBBBBBBBBB................\n...BBBBBBBBBB...............\n....BBBBBBBBB...............\n.....BBBBBBBB...............\n......BBBBBBB...............\n....................WWWWWWWW\n...................WWWWWWWWW\n...................WWWWWWWWW\n....................WWWWWWWW\n.....................WWWWWWW\n......................WWWWWW\n.......................WWWWW\n.............W..........WWWW\nBBBBB.......................\nBBBBBB......................\nBBBBBBB.....................\nBBBBBBBB....................\nBBBBBBBB....................\nBBBBBBB.....................\n.............WWWWWWWW.......\n.............WWWWWWWWW......\n.............WWWWWWWWWW.....\n..............WWWWWWWWWW....\n...............WWWWWWWWWW...\n................WWWWWWWWWW.."},{"id":"n29","n":29,"w":122,"b":122,"source":"Verified search","grid":".W.............WWWWWWW.......\nW.W............WWWWWWW.......\nWW.W...........WWWWWWW.......\nWWW.W..........WWWWWWW.......\nWWWW.W.........WWWWWWW.......\nWWWWW.W........WWWWWWW.......\nWWWWWW..........WWWWWW.......\nWWWWWWW..........WWWW........\nWWWWWWW...........WW.........\nWWWWWWW......................\n.WWWWWW......................\n..WWWWW......................\n...WWWW......................\n....WWW......................\n.....WW......................\n......................BBB....\n......................BBBB...\n......................BBBBB..\n......................BBBBBB.\n.........B............BBBBBBB\n........BBB...........BBBBBBB\n.......BBBBB...........BBBBBB\n.......BBBBBB.........B.BBBBB\n.......BBBBBBB.........B.BBBB\n.......BBBBBBBB.........B.BBB\n.......BBBBBBBB..........B.BB\n.......BBBBBBBB...........B.B\n.......BBBBBBBB............B.\n.......BBBBBBBB.............B"},{"id":"n30","n":30,"w":131,"b":131,"source":"Verified search","grid":"BBBBBBBBBB....................\n.BBBBBBBBBB...................\n..BBBBBBBBBB..................\n...BBBBBBBBBB.................\n....BBBBBBBBBB................\n.....BBBBBBBBBB...............\n......BBBBBBBBB...............\n.......BBBBBBBB...............\n.....................WWWWWWWWW\n....................WWWWWWWWWW\n....................WWWWWWWWWW\n.....................WWWWWWWWW\n......................WWWWWWWW\n.......................WWWWWWW\n........................WWWWWW\n.........................WWWWW\nBBBBBB........................\nBBBBBBB.......................\nBBBBBBBB......................\nBBBBBBBBB.....................\nBBBBBBBBB.....................\nBBBBBBBB......................\nBBBBBBB.......................\n...............WWWWWWWW.......\n...............WWWWWWWWW......\n...............WWWWWWWWWW.....\n................WWWWWWWWWW....\n.................WWWWWWWWWW...\n..................WWWWWWWWWW..\n...................WWWWWWWWWW."},{"id":"n31","n":31,"w":139,"b":139,"source":"Verified search","grid":".WWWWWWWWW.....................\nW.WWWWWWWWW....................\n.W.WWWWWWWWW...................\n..W.WWWWWWWWW..................\n...W.WWWWWWWWW.................\n....W.WWWWWWWWW................\n.....W.WWWWWWWW................\n......W.WWWWWWW................\n.......W.WWWWWW................\n......................BBBBBBBBB\n.....................BBBBBBBBBB\n.....................BBBBBBBBBB\n......................BBBBBBBBB\n.......................BBBBBBBB\n........................BBBBBBB\n.........................BBBBBB\nWWWWW..........................\n...............B.B.........BBBB\nWWWWWWW........................\nWWWWWWWW.......................\nWWWWWWWWW......................\nWWWWWWWWWW.....................\nWWWWWWWWW......................\nWWWWWWWW.......................\n...............BBBBBBBB.B......\n...............BBBBBBBBB.B.....\n...............BBBBBBBBBB.B....\n................BBBBBBBBBB.B...\n.................BBBBBBBBBB.B..\n..................BBBBBBBBBB.B.\n...................BBBBBBBBBB.B"},{"id":"n32","n":32,"w":149,"b":149,"source":"Verified search","grid":"B...............BBBBBBBB........\n.B..............BBBBBBBB........\nB.B.............BBBBBBBB........\nBB.B............BBBBBBBB........\nBBB.B...........BBBBBBBB........\nBBBB.B..........BBBBBBBB........\nBBBBB.B.........BBBBBBBB........\nBBBBBB.B.........BBBBBBB........\nBBBBBBB...........BBBBB.........\nBBBBBBBB...........BBB..........\nBBBBBBBB............B...........\n.BBBBBBB........................\n..BBBBBB........................\n...BBBBB........................\n....BBBB........................\n.....BBB........................\n...............W........WW......\n........................WWW.....\n........................WWWW....\n........................WWWWW...\n........................WWWWWW..\n..........W.............WWWWWWW.\n.........WWW............WWWWWWWW\n........WWWWW...........WWWWWWWW\n........WWWWWW...........WWWWWWW\n........WWWWWWW.........W.WWWWWW\n........WWWWWWWW.........W.WWWWW\n........WWWWWWWW..........W.WWWW\n........WWWWWWWW...........W.WWW\n........WWWWWWWW............W.WW\n........WWWWWWWW.............W.W\n........WWWWWWWW..............W."},{"id":"n33","n":33,"w":158,"b":159,"source":"Verified search","grid":".....................WWWWWWWWWW.W\n....................WWWWWWWWWW.W.\n...................WWWWWWWWWW.W..\n..................WWWWWWWWWW.W...\n.................WWWWWWWWWW.W....\n.................WWWWWWWWW.W.....\n.................WWWWWWWW.W......\n.................WWWWWWW.W.......\nBBBBBBBBB........................\nBBBBBBBBBB.......................\nBBBBBBBBBBB......................\nBBBBBBBBBB.......................\nBBBBBBBBB........................\nBBBBBBBB.........................\nBBBBBBB..........................\n.................W..........WWWWW\n...........................WWWWWW\n..........................WWWWWWW\n.........................WWWWWWWW\n........................WWWWWWWWW\n.......................WWWWWWWWWW\n......................WWWWWWWWWWW\n.......................WWWWWWWWWW\n........................WWWWWWWWW\n.......B.BBBBBBBB................\n......B.BBBBBBBBB................\n.....B.BBBBBBBBBB................\n....B.BBBBBBBBBB.................\n...B.BBBBBBBBBB..................\n..B.BBBBBBBBBB...................\n.B.BBBBBBBBBB....................\nB.BBBBBBBBBB.....................\n.BBBBBBBBBB......................"},{"id":"n34","n":34,"w":168,"b":168,"source":"Verified search","grid":"W................WWWWWWWW.........\n.W...............WWWWWWWW.........\nW.W..............WWWWWWWW.........\nWW.W.............WWWWWWWW.........\nWWW.W............WWWWWWWW.........\nWWWW.W...........WWWWWWWW.........\nWWWWW.W..........WWWWWWWW.........\nWWWWWW.W..........WWWWWWW.........\nWWWWWWW.W..........WWWWWW.........\nWWWWWWWW............WWWW..........\nWWWWWWWWW............WW...........\nWWWWWWWWW.........................\n.WWWWWWWW.........................\n..WWWWWWW.........................\n...WWWWWW.........................\n....WWWWW.........................\n.....WWWW.........................\n................B........BBB......\n.........................BBBB.....\n.........................BBBBB....\n.........................BBBBBB...\n.........................BBBBBBB..\n.........................BBBBBBBB.\n..........BB.............BBBBBBBBB\n.........BBBB............BBBBBBBBB\n.........BBBBB............BBBBBBBB\n.........BBBBBB..........B.BBBBBBB\n.........BBBBBBB..........B.BBBBBB\n.........BBBBBBBB..........B.BBBBB\n.........BBBBBBBB...........B.BBBB\n.........BBBBBBBB............B.BBB\n.........BBBBBBBB.............B.BB\n.........BBBBBBBB..............B.B\n.........BBBBBBBB...............B."},{"id":"n35","n":35,"w":178,"b":178,"source":"Verified search","grid":"...............WWWWWWWWWW..........\nW..............WWWWWWWWWW..........\n.W.............WWWWWWWWWW..........\nW.W............WWWWWWWWWW..........\nWW.W...........WWWWWWWWWW..........\nWWW.W...........WWWWWWWWW..........\nWWWW.W...........WWWWWWWW..........\nWWWWW.W...........WWWWWWW..........\nWWWWWW.W...........WWWWW...........\nWWWWWWW.............WWW.W..........\nWWWWWWWW.............W.W...........\nWWWWWWWW..............W............\nWWWWWWWW...........................\nWWWWWWWW...........................\n.WWWWWWW...........................\n..WWWWWW...........................\n...WWWWW.......W...................\n....WWWW........W..................\n.........................BBBB......\n.........................BBBBB.....\n.........................BBBBBB....\n.........................BBBBBBB...\n.........................BBBBBBBB..\n.........B...............BBBBBBBBB.\n........B.B..............BBBBBBBBBB\n.........BBB.............BBBBBBBBBB\n........BBBBB.............BBBBBBBBB\n........BBBBBB...........B.BBBBBBBB\n........BBBBBBB...........B.BBBBBBB\n........BBBBBBB............B.BBBBBB\n........BBBBBBB.............B.BBBBB\n........BBBBBBB..............B.BBBB\n........BBBBBBB...............B.BBB\n........BBBBBBB................B.BB\n........BBBBBBB.................B.B"},{"id":"n36","n":36,"w":188,"b":188,"source":"Verified search","grid":"BB.................BBBBBBBB.........\n.BB................BBBBBBBB.........\nB.BB...............BBBBBBBB.........\nBB.BB..............BBBBBBBB.........\nBBB.BB.............BBBBBBBB.........\nBBBB.BB............BBBBBBBB.........\nBBBBB.BB............BBBBBBB.........\nBBBBBB.BB..........B.BBBBBB.........\nBBBBBBB.B...........B.BBBBB.........\nBBBBBBBB.............B.BBB..........\nBBBBBBBBB.............B.B.B.........\nBBBBBBBBB..............B.B..........\nBBBBBBBBB...............B...........\n.BBBBBBBB...........................\n..BBBBBBB...........................\n...BBBBBB...........................\n....BBBBB...........................\n.....BBBB...........................\n.................W.........WWW.W....\n..................W........WWWW.W...\n...........................WWWWW.W..\n...........................WWWWWW.W.\n...........................WWWWWWW.W\n...........................WWWWWWWW.\n...........W...............WWWWWWWWW\n..........W.W..............WWWWWWWWW\n.........W.WWW..............WWWWWWWW\n..........WWWWW..............WWWWWWW\n.........WWWWWWW...........W..WWWWWW\n.........WWWWWWWW...........W..WWWWW\n.........WWWWWWWWW...........W..WWWW\n.........WWWWWWWWWW...........W..WWW\n.........WWWWWWWWWW............W..WW\n.........WWWWWWWWWW.............W..W\n.........WWWWWWWWWW..............W..\n.........WWWWWWWWWW...............W."},{"id":"n37","n":37,"w":199,"b":199,"source":"Verified search","grid":".........................WWWWWWWWWWW.\n........................WWWWWWWWWWW.W\n.......................WWWWWWWWWWW.WW\n......................WWWWWWWWWWW.WW.\n.....................WWWWWWWWWWW.WW..\n....................WWWWWWWWWWW.WW...\n...................WWWWWWWWWWW.WW....\n...................WWWWWWWWWW.WW.....\n...................WWWWWWWWW.WW......\n...................WWWWWWWW.WW.......\nBBBBBBBBBBB..........................\nBBBBBBBBBBBB.........................\nBBBBBBBBBBBBB........................\nBBBBBBBBBBBB.........................\nBBBBBBBBBBB..........................\nBBBBBBBBBB...........................\nBBBBBBBBB............................\nBBBBBBBB.............................\nBBBBBBB...........B..................\nBBBBBB...........B...................\n...............................WWWWWW\n..............................WWWWWWW\n.............................WWWWWWWW\n............................WWWWWWWWW\n...........................WWWWWWWWWW\n..........................WWWWWWWWWWW\n...........................WWWWWWWWWW\n............................WWWWWWWWW\n.............................WWWWWWWW\n.......B..BBBBBBBBB..................\n......B..BBBBBBBBBB..................\n.....B..BBBBBBBBBBB..................\n....B..BBBBBBBBBBBB..................\n...B..BBBBBBBBBBBB...................\n..B..BBBBBBBBBBBB....................\n.B..BBBBBBBBBBBB.....................\nB..BBBBBBBBBBBB......................"},{"id":"n38","n":38,"w":210,"b":210,"source":"Verified search","grid":"B.B................BBBBBBBBB..........\n.B.B...............BBBBBBBBB..........\nB.B.B..............BBBBBBBBB..........\nBB.B.B.............BBBBBBBBB..........\nBBB.B.B............BBBBBBBBB..........\nBBBB.B.B...........BBBBBBBBB..........\nBBBBB.B.B...........BBBBBBBB..........\nBBBBBB.B.B...........BBBBBBB..........\nBBBBBBB.B.............BBBBBB..........\nBBBBBBBB.B.............BBBBB..........\nBBBBBBBBB...............BBB...........\nBBBBBBBBBB...............B.B..........\nBBBBBBBBBB................B...........\n.BBBBBBBBB............................\n..BBBBBBBB............................\n...BBBBBBB............................\n....BBBBBB............................\n.....BBBBB.........B..................\n......BBBB..........B.................\n..................W.........WWWWW.....\n............................WWWWWW....\n............................WWWWWWW...\n............................WWWWWWWW..\n............................WWWWWWWWW.\n............................WWWWWWWWWW\n............W...............WWWWWWWWWW\n...........W.W...............WWWWWWWWW\n..........W.WWW.............W.WWWWWWWW\n...........WWWWW.............W.WWWWWWW\n..........WWWWWWW...........W.W.WWWWWW\n..........WWWWWWWW...........W.W.WWWWW\n..........WWWWWWWWW...........W.W.WWWW\n..........WWWWWWWWW............W.W.WWW\n..........WWWWWWWWW.............W.W.WW\n..........WWWWWWWWW..............W.W.W\n..........WWWWWWWWW...............W.W.\n..........WWWWWWWWW................W.W\n..........WWWWWWWWW.................W."},{"id":"n39","n":39,"w":221,"b":221,"source":"Verified search","grid":".........................WWWWWWWWWW.WWW\n........................WWWWWWWWWW.WWW.\n.......................WWWWWWWWWW.WWW..\n......................WWWWWWWWWW.WWW...\n.....................WWWWWWWWWW.WWW....\n....................WWWWWWWWWW.WWW.....\n...................WWWWWWWWWW.WWW......\n...................WWWWWWWWW.WWW.......\n...................WWWWWWWW.WWW........\n...................WWWWWWW.WWW.........\nBBBBBBBBBB.B...........................\nBBBBBBBBBBB.B..........................\nBBBBBBBBBBBB...........................\nBBBBBBBBBBBB...........................\nBBBBBBBBBBB............................\nBBBBBBBBBB.............................\nBBBBBBBBB..............................\nBBBBBBBB..........B....................\nBBBBBBB..........B.....................\n...................W.............WWWWWW\n................................WWWWWWW\n...............................WWWWWWWW\n..............................WWWWWWWWW\n.............................WWWWWWWWWW\n............................WWWWWWWWWWW\n...........................WWWWWWWWWWWW\n..........................W.WWWWWWWWWWW\n...........................W.WWWWWWWWWW\n............................W.WWWWWWWWW\n......B...BBBBBBBBB....................\n.....B...BBBBBBBBBB....................\n....B...BBBBBBBBBBB....................\n...B...BBBBBBBBBBBB....................\n..B...BBBBBBBBBBBBB....................\n.B...BBBBBBBBBBBBB.....................\nB...BBBBBBBBBBBBB......................\n...BBBBBBBBBBBBB.......................\n..BBBBBBBBBBBBB........................\n.BBBBBBBBBBBBB........................."},{"id":"n40","n":40,"w":233,"b":232,"source":"Verified search","grid":"..........WWWWWWWWWW....................\n..........WWWWWWWWWW...................W\n..........WWWWWWWWWW..................W.\n..........WWWWWWWWWW.................W.W\n..........WWWWWWWWWW................W.WW\n..........WWWWWWWWWW...............W.WWW\n..........WWWWWWWWWW..............W.WWWW\n..........WWWWWWWWWW.............W.WWWWW\n..........WWWWWWWWW.............W.WWWWWW\n..........WWWWWWWW.............W.WWWWWWW\n...........WWWWWW.............W.WWWWWWWW\n............WWWW...............WWWWWWWWW\n.............WW...............WWWWWWWWWW\n..............................WWWWWWWWWW\n..............................WWWWWWWWWW\n..............................WWWWWWWWW.\n..............................WWWWWWWW..\n..............................WWWWWWW...\n..............................WWWWWW....\n..............................WWWWW.....\n..............................WWWW......\n......BBBB..........B...................\n.....BBBBB..............................\n....BBBBBB..............................\n...BBBBBBB..............................\n..BBBBBBBB..............................\n.BBBBBBBBB..............................\nBBBBBBBBBB.................B............\nBBBBBBBBBB................BBB...........\nBBBBBBBBBB...............BBBBB..........\nBBBBBBBBBB..............BBBBBB..........\nBBBBBBBBB..............BBBBBBB..........\nBBBBBBBB.B............BBBBBBBB..........\nBBBBBBB.B............BBBBBBBBB..........\nBBBBBB.B............BBBBBBBBBB..........\nBBBBB.B.............BBBBBBBBBB..........\nBBBB.B..............BBBBBBBBBB..........\nBBB.B...............BBBBBBBBBB..........\nBB.B................BBBBBBBBBB..........\nB.B.................BBBBBBBBBB.........."}];
+  </script>
+  <script>
+
+(function () {
+  "use strict";
+
+  const PROVEN = [0, 0, 1, 2, 4, 5, 7, 9, 12, 14, 17, 21, 24, 28, 32, 37, 42, 47, 52, 58];
+
+  function recordFor(n) {
+    if (n >= 1 && n <= 20) {
+      return { value: PROVEN[n - 1], status: "proven", label: "proven" };
+    }
+    return { value: Math.floor((7 * n * n) / 48), status: "lower-bound", label: "lower bound" };
+  }
+
+  const GALLERY = window.PQ_GALLERY || [];
+
+  let n = 8;
+  let mode = "auto";
+  let tool = "W";
+  let cells = new Uint8Array(n * n);
+  let hist = [];
+  let histI = 0;
+  let builtN = 0;
+  let galleryFilter = "all";
+
+  const el = {
+    size: document.getElementById("size"),
+    mode: document.getElementById("mode-seg"),
+    toolWrap: document.getElementById("tool-wrap"),
+    tool: document.getElementById("tool-seg"),
+    undo: document.getElementById("undo"),
+    redo: document.getElementById("redo"),
+    clear: document.getElementById("clear"),
+    board: document.getElementById("board"),
+    hint: document.getElementById("hint"),
+    stats: document.getElementById("stats"),
+    importText: document.getElementById("import-text"),
+    importMsg: document.getElementById("import-msg"),
+    exportPre: document.getElementById("export-pre"),
+    copyMsg: document.getElementById("copy-msg"),
+    recTable: document.getElementById("record-table"),
+    recSeg: document.getElementById("rec-seg"),
+    galTable: document.getElementById("gallery-table"),
+    galSeg: document.getElementById("gal-seg")
+  };
+
+  function snapshot() {
+    return { n: n, mode: mode, tool: tool, cells: new Uint8Array(cells) };
+  }
+
+  function restore(s) {
+    n = s.n;
+    mode = s.mode;
+    tool = s.tool;
+    cells = new Uint8Array(s.cells);
+  }
+
+  function resetHist() {
+    hist = [snapshot()];
+    histI = 0;
+  }
+
+  function commit() {
+    hist = hist.slice(0, histI + 1);
+    hist.push(snapshot());
+    if (hist.length > 250) hist.shift();
+    histI = hist.length - 1;
+  }
+
+  function attacksFromWhite(size, board) {
+    const rows = new Uint8Array(size);
+    const cols = new Uint8Array(size);
+    const d1 = new Uint8Array(2 * size);
+    const d2 = new Uint8Array(2 * size);
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (board[r * size + c] === 1) {
+          rows[r] = 1;
+          cols[c] = 1;
+          d1[r - c + size - 1] = 1;
+          d2[r + c] = 1;
+        }
+      }
+    }
+    const att = new Uint8Array(size * size);
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        const i = r * size + c;
+        if (board[i] === 1) continue;
+        if (rows[r] || cols[c] || d1[r - c + size - 1] || d2[r + c]) att[i] = 1;
+      }
+    }
+    return att;
+  }
+
+  function conflictSet(size, board, att) {
+    const mark = new Set();
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === 2 && att[i]) mark.add(i);
+    }
+    if (mark.size === 0) return mark;
+    const rows = new Uint8Array(size);
+    const cols = new Uint8Array(size);
+    const d1 = new Uint8Array(2 * size);
+    const d2 = new Uint8Array(2 * size);
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (board[r * size + c] === 2) {
+          rows[r] = 1;
+          cols[c] = 1;
+          d1[r - c + size - 1] = 1;
+          d2[r + c] = 1;
+        }
+      }
+    }
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (board[r * size + c] === 1) {
+          if (rows[r] || cols[c] || d1[r - c + size - 1] || d2[r + c]) {
+            mark.add(r * size + c);
+          }
+        }
+      }
+    }
+    return mark;
+  }
+
+  function analyze() {
+    const att = attacksFromWhite(n, cells);
+    let w = 0;
+    let bStored = 0;
+    let unattacked = 0;
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i] === 1) w++;
+      else if (cells[i] === 2) bStored++;
+      if (cells[i] !== 1 && !att[i]) unattacked++;
+    }
+    const b = mode === "auto" ? unattacked : bStored;
+    const conflicts = mode === "auto" ? new Set() : conflictSet(n, cells, att);
+    return {
+      w: w,
+      b: b,
+      att: att,
+      unattacked: unattacked,
+      conflicts: conflicts,
+      army: Math.min(w, b),
+      valid: conflicts.size === 0
+    };
+  }
+
+  function vsRecord(size, army, valid) {
+    const rec = recordFor(size);
+    if (!valid) return { text: "Invalid — opposite queens attack", tone: "bad", rec: rec };
+    const d = army - rec.value;
+    if (rec.status === "proven") {
+      if (d === 0) return { text: "Matches the proven record", tone: "ok", rec: rec };
+      if (d > 0) return { text: "Beats the proven record by " + d, tone: "ok", rec: rec };
+      return { text: (rec.value - army) + " below the proven record", tone: "", rec: rec };
+    }
+    if (d > 0) return { text: "Beats the best-known lower bound by " + d, tone: "ok", rec: rec };
+    if (d === 0) return { text: "Matches the best-known lower bound", tone: "ok", rec: rec };
+    return { text: (rec.value - army) + " below the best-known lower bound", tone: "", rec: rec };
+  }
+
+  function setSize(newN, keep) {
+    newN = Math.max(1, Math.min(50, newN | 0));
+    const next = new Uint8Array(newN * newN);
+    if (keep && cells) {
+      const m = Math.min(n, newN);
+      for (let r = 0; r < m; r++) {
+        for (let c = 0; c < m; c++) next[r * newN + c] = cells[r * n + c];
+      }
+    }
+    n = newN;
+    cells = next;
+  }
+
+  function clickCell(i) {
+    if (mode === "auto") {
+      if (cells[i] === 1) cells[i] = 0;
+      else cells[i] = 1;
+    } else {
+      if (tool === "W") cells[i] = cells[i] === 1 ? 0 : 1;
+      else if (tool === "B") cells[i] = cells[i] === 2 ? 0 : 2;
+      else cells[i] = 0;
+    }
+    commit();
+    render();
+  }
+
+  function switchMode(next) {
+    if (next === mode) return;
+    if (mode === "auto" && next === "manual") {
+      const att = attacksFromWhite(n, cells);
+      for (let i = 0; i < cells.length; i++) {
+        if (cells[i] !== 1 && !att[i]) cells[i] = 2;
+      }
+    } else if (mode === "manual" && next === "auto") {
+      for (let i = 0; i < cells.length; i++) {
+        if (cells[i] === 2) cells[i] = 0;
+      }
+    }
+    mode = next;
+    commit();
+    render();
+  }
+
+  function applyBoard(size, gridRows, nextMode) {
+    setSize(size, false);
+    cells = new Uint8Array(n * n);
+    for (let r = 0; r < n; r++) {
+      const row = gridRows[r] || "";
+      for (let c = 0; c < n; c++) {
+        const ch = row[c] || ".";
+        if (ch === "W") cells[r * n + c] = 1;
+        else if (ch === "B") cells[r * n + c] = 2;
+      }
+    }
+    mode = nextMode || "manual";
+  }
+
+  function exportGrid() {
+    const a = analyze();
+    const rows = [];
+    for (let r = 0; r < n; r++) {
+      let s = "";
+      for (let c = 0; c < n; c++) {
+        const i = r * n + c;
+        if (cells[i] === 1) s += "W";
+        else if (mode === "auto") s += a.att[i] ? "." : "B";
+        else s += cells[i] === 2 ? "B" : ".";
+      }
+      rows.push(s);
+    }
+    return "# n=" + n + " W=" + a.w + " B=" + a.b + "\n" + rows.join("\n");
+  }
+
+  function normalizeRow(s) {
+    return s.toUpperCase().replace(/Q/g, "W").replace(/[X0\-]/g, ".");
+  }
+
+  function parseLayout(text) {
+    const lines = String(text || "").replace(/\r/g, "").split("\n");
+    const gridLines = [];
+    const placements = [];
+    let nHint = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      let trimmed = lines[i].trim();
+      if (!trimmed || trimmed.charAt(0) === "#" || trimmed.indexOf("//") === 0) continue;
+      const nEq = trimmed.match(/^n\s*=\s*(\d+)/i);
+      if (nEq) {
+        nHint = parseInt(nEq[1], 10);
+        continue;
+      }
+      const one = trimmed.match(/^(W|B|White|Black|w|b|Q|q)\s+(\d+)\s*,?\s*(\d+)\s*$/);
+      if (one) {
+        const color = one[1].toUpperCase().charAt(0) === "B" ? "B" : "W";
+        placements.push({ color: color, r: parseInt(one[2], 10), c: parseInt(one[3], 10) });
+        continue;
+      }
+      const headed = trimmed.match(/^(W|B|White|Black|w|b|Q|q)\s*:\s*(.+)$/i);
+      if (headed) {
+        const color = headed[1].toUpperCase().charAt(0) === "B" ? "B" : "W";
+        const rest = headed[2];
+        const pairs = rest.matchAll(/\(?\s*(\d+)\s*,\s*(\d+)\s*\)?/g);
+        let found = false;
+        for (const m of pairs) {
+          placements.push({ color: color, r: parseInt(m[1], 10), c: parseInt(m[2], 10) });
+          found = true;
+        }
+        if (!found) {
+          const algs = rest.matchAll(/\b([a-zA-Z])(\d+)\b/g);
+          for (const m of algs) {
+            placements.push({
+              color: color,
+              file: m[1].toLowerCase().charCodeAt(0) - 97,
+              rank: parseInt(m[2], 10)
+            });
+          }
+        }
+        continue;
+      }
+      const loneAlg = trimmed.match(/^(W|B)\s+(.+)$/i);
+      if (loneAlg) {
+        const color = loneAlg[1].toUpperCase() === "B" ? "B" : "W";
+        const algs = loneAlg[2].matchAll(/\b([a-zA-Z])(\d+)\b/g);
+        let any = false;
+        for (const m of algs) {
+          placements.push({
+            color: color,
+            file: m[1].toLowerCase().charCodeAt(0) - 97,
+            rank: parseInt(m[2], 10)
+          });
+          any = true;
+        }
+        if (any) continue;
+      }
+      const compact = trimmed.replace(/\s+/g, "");
+      if (/^[WwBbQq.xX\-]+$/.test(compact) && compact.length >= 1) {
+        gridLines.push(normalizeRow(compact));
+        continue;
+      }
+      return { error: "Could not parse this line: " + trimmed };
+    }
+
+    if (gridLines.length) {
+      const size = nHint || gridLines.length;
+      if (gridLines.length !== size) {
+        return { error: "Expected " + size + " grid rows, found " + gridLines.length + "." };
+      }
+      for (let i = 0; i < gridLines.length; i++) {
+        if (gridLines[i].length !== size) {
+          return { error: "Row " + (i + 1) + " has " + gridLines[i].length + " squares, expected " + size + "." };
+        }
+      }
+      if (size < 1 || size > 50) return { error: "Board size must be between 1 and 50." };
+      return { n: size, rows: gridLines };
+    }
+
+    if (placements.length) {
+      const numeric = placements.filter(function (p) { return p.r != null; });
+      const algebraic = placements.filter(function (p) { return p.file != null; });
+      let size = nHint;
+      if (algebraic.length) {
+        const maxRank = Math.max.apply(null, algebraic.map(function (p) { return p.rank; }));
+        const maxFile = Math.max.apply(null, algebraic.map(function (p) { return p.file; }));
+        size = size || Math.max(maxRank, maxFile + 1);
+        algebraic.forEach(function (p) {
+          p.r = size - p.rank;
+          p.c = p.file;
+        });
+      }
+      if (numeric.length) {
+        const vals = [];
+        numeric.forEach(function (p) { vals.push(p.r, p.c); });
+        const maxV = Math.max.apply(null, vals);
+        const minV = Math.min.apply(null, vals);
+        const oneBased = minV >= 1 && (maxV === size || (size == null && maxV >= 1 && minV >= 1));
+        if (size == null) {
+          size = oneBased || minV >= 1 ? maxV : maxV + 1;
+        }
+        const offset = (minV === 0) ? 0 : (maxV === size || (minV >= 1 && maxV <= size && minV !== 0 && (maxV === size || oneBased)) ? 1 : (minV === 0 ? 0 : (maxV >= size ? 0 : 1)));
+        let useZero = minV === 0;
+        if (!useZero && maxV === size) useZero = false;
+        if (!useZero && minV >= 1 && maxV <= (size || maxV)) {
+          useZero = false;
+        }
+        const shift = useZero ? 0 : 1;
+        if (size == null) size = useZero ? maxV + 1 : maxV;
+        numeric.forEach(function (p) {
+          p.r = p.r - shift;
+          p.c = p.c - shift;
+        });
+      }
+      if (!size || size < 1 || size > 50) return { error: "Board size must be between 1 and 50." };
+      const rows = [];
+      for (let r = 0; r < size; r++) rows.push(Array(size + 1).join(".").slice(0, size).split(""));
+      // fix empty row init
+      for (let r = 0; r < size; r++) {
+        rows[r] = [];
+        for (let c = 0; c < size; c++) rows[r][c] = ".";
+      }
+      for (let i = 0; i < placements.length; i++) {
+        const p = placements[i];
+        if (p.r < 0 || p.c < 0 || p.r >= size || p.c >= size) {
+          return { error: "Coordinate (" + (p.r + 1) + "," + (p.c + 1) + ") is off a " + size + "×" + size + " board." };
+        }
+        rows[p.r][p.c] = p.color;
+      }
+      return { n: size, rows: rows.map(function (r) { return r.join(""); }) };
+    }
+
+    return { error: "Paste a W/B/. grid, or a list such as W 1 2 and B 3 4." };
+  }
+
+  function renderBoard(a) {
+    if (builtN !== n) {
+      el.board.innerHTML = "";
+      el.board.style.gridTemplateColumns = "repeat(" + n + ", 1fr)";
+      el.board.style.gridTemplateRows = "repeat(" + n + ", 1fr)";
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < n * n; i++) {
+        const d = document.createElement("div");
+        d.className = "sq";
+        d.dataset.i = String(i);
+        const p = document.createElement("span");
+        p.className = "piece";
+        d.appendChild(p);
+        frag.appendChild(d);
+      }
+      el.board.appendChild(frag);
+      builtN = n;
+    }
+    const showLetter = n <= 24;
+    const fontPx = Math.max(7, Math.floor(Math.min(28, 520 / n)));
+    const kids = el.board.children;
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        const i = r * n + c;
+        const d = kids[i];
+        const p = d.firstChild;
+        const light = (r + c) % 2 === 0;
+        let kind = 0;
+        if (cells[i] === 1) kind = 1;
+        else if (mode === "auto") kind = a.att[i] ? 0 : 2;
+        else kind = cells[i];
+        const conflict = a.conflicts.has(i);
+        let cls = "sq " + (light ? "lt" : "dk");
+        if (mode === "auto" && kind === 0) cls += " cleared";
+        if (conflict) cls += " conflict";
+        d.className = cls;
+        if (kind === 1 || kind === 2) {
+          p.className = "piece " + (kind === 1 ? "W" : "B") + (mode === "auto" && kind === 2 ? " ghost" : "");
+          p.textContent = showLetter ? (kind === 1 ? "W" : "B") : "";
+          p.style.fontSize = fontPx + "px";
+          p.style.display = "flex";
+        } else {
+          p.className = "piece";
+          p.textContent = "";
+          p.style.display = "none";
+        }
+      }
+    }
+  }
+
+  function renderStats(a) {
+    const cmp = vsRecord(n, a.army, a.valid);
+    const recNote = "a(" + n + ") " + (cmp.rec.status === "proven" ? "= " : "≥ ") + cmp.rec.value + " (" + cmp.rec.label + ")";
+    el.stats.innerHTML =
+      '<div class="stat"><div class="k">W</div><div class="v">' + a.w + '</div><div class="d">White queens</div></div>' +
+      '<div class="stat"><div class="k">B</div><div class="v">' + a.b + '</div><div class="d">' +
+      (mode === "auto" ? "Safe squares" : "Black queens") + "</div></div>" +
+      '<div class="stat ' + (a.valid ? "ok" : "bad") + '"><div class="k">Army size</div><div class="v">' +
+      a.army + '</div><div class="d">min(W, B)' + (a.valid ? "" : " — invalid") + "</div></div>" +
+      '<div class="stat ' + cmp.tone + '"><div class="k">Vs record</div><div class="v" style="font-size:1.05rem;line-height:1.3">' +
+      cmp.text + '</div><div class="d">' + recNote + "</div></div>";
+    el.hint.textContent = mode === "auto"
+      ? "Click a square to place a white queen; click it again to remove it. Attacked squares are cleared. Black fills every safe square."
+      : "Place white and black queens explicitly. Squares where opposite queens attack each other are highlighted.";
+  }
+
+  function renderControls() {
+    el.size.value = String(n);
+    Array.prototype.forEach.call(el.mode.querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.dataset.mode === mode);
+    });
+    el.toolWrap.style.display = mode === "manual" ? "flex" : "none";
+    Array.prototype.forEach.call(el.tool.querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.dataset.tool === tool);
+    });
+    el.undo.disabled = histI <= 0;
+    el.redo.disabled = histI >= hist.length - 1;
+  }
+
+  function renderExport() {
+    el.exportPre.textContent = exportGrid();
+  }
+
+  let recRange = "proven";
+
+  function renderRecords() {
+    let lo = 1, hi = 20;
+    if (recRange === "mid") { lo = 21; hi = 30; }
+    else if (recRange === "high") { lo = 31; hi = 50; }
+    const a = analyze();
+    let html = "<table><thead><tr><th class='num'>n</th><th class='num'>Best known</th><th>Status</th><th class='num'>This board</th><th>Gap</th></tr></thead><tbody>";
+    for (let i = lo; i <= hi; i++) {
+      const rec = recordFor(i);
+      const isCur = i === n;
+      const cur = isCur ? (a.valid ? String(a.army) : "invalid") : "—";
+      let gap = "—";
+      if (isCur && a.valid) {
+        const d = a.army - rec.value;
+        gap = d === 0 ? "Match" : (d > 0 ? "+" + d : String(d));
+      }
+      html += "<tr class='" + (isCur ? "current" : "") + "'><td class='num'>" + i +
+        "</td><td class='num'>" + rec.value + "</td><td><span class='pill " +
+        (rec.status === "proven" ? "proven" : "") + "'>" + rec.label +
+        "</span></td><td class='num'>" + cur + "</td><td>" + gap + "</td></tr>";
+    }
+    html += "</tbody></table>";
+    el.recTable.innerHTML = html;
+    Array.prototype.forEach.call(el.recSeg.querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.dataset.range === recRange);
+    });
+  }
+
+  function renderGallery() {
+    let items = GALLERY.slice();
+    if (galleryFilter === "proven") items = items.filter(function (s) { return s.n <= 20; });
+    else if (galleryFilter === "open") items = items.filter(function (s) { return s.n >= 21; });
+    let html = "<table><thead><tr><th class='num'>n</th><th class='num'>Armies</th><th>Vs record</th><th>Source</th><th></th></tr></thead><tbody>";
+    for (let i = 0; i < items.length; i++) {
+      const s = items[i];
+      const rec = recordFor(s.n);
+      const m = Math.min(s.w, s.b);
+      const d = m - rec.value;
+      let vs;
+      if (rec.status === "proven") vs = d === 0 ? "Matches proven record" : (d > 0 ? "Beats proven +" + d : d + " vs proven");
+      else vs = d === 0 ? "Matches best-known bound" : (d > 0 ? "Beats bound +" + d : d + " vs bound");
+      html += "<tr><td class='num'>" + s.n + "</td><td class='num'>" + s.w + "+" + s.b +
+        "</td><td>" + vs + "</td><td>" + (s.source || "Verified search") +
+        "</td><td><button type='button' data-load='" + s.id + "'>Load</button></td></tr>";
+    }
+    html += "</tbody></table>";
+    el.galTable.innerHTML = html;
+    Array.prototype.forEach.call(el.galSeg.querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.dataset.gal === galleryFilter);
+    });
+  }
+
+  function render() {
+    const a = analyze();
+    renderControls();
+    renderBoard(a);
+    renderStats(a);
+    renderExport();
+    renderRecords();
+  }
+
+  function loadSolution(sol) {
+    applyBoard(sol.n, sol.grid.split("\n"), "manual");
+    commit();
+    el.importMsg.className = "msg ok";
+    el.importMsg.textContent = "Loaded n=" + sol.n + " with " + sol.w + " white and " + sol.b + " black.";
+    document.getElementById("board-section").scrollIntoView({ behavior: "smooth", block: "start" });
+    render();
+  }
+
+  function initSizeOptions() {
+    for (let i = 1; i <= 50; i++) {
+      const o = document.createElement("option");
+      o.value = String(i);
+      o.textContent = i + "×" + i;
+      el.size.appendChild(o);
+    }
+    el.size.value = "8";
+  }
+
+  initSizeOptions();
+  resetHist();
+  renderGallery();
+  render();
+
+  el.size.addEventListener("change", function () {
+    const next = parseInt(el.size.value, 10);
+    if (next === n) return;
+    setSize(next, false);
+    mode = "auto";
+    commit();
+    render();
+  });
+
+  el.mode.addEventListener("click", function (e) {
+    const b = e.target.closest("button");
+    if (b && b.dataset.mode) switchMode(b.dataset.mode);
+  });
+
+  el.tool.addEventListener("click", function (e) {
+    const b = e.target.closest("button");
+    if (b && b.dataset.tool) {
+      tool = b.dataset.tool;
+      renderControls();
+    }
+  });
+
+  el.undo.addEventListener("click", function () {
+    if (histI <= 0) return;
+    histI--;
+    restore(hist[histI]);
+    render();
+  });
+
+  el.redo.addEventListener("click", function () {
+    if (histI >= hist.length - 1) return;
+    histI++;
+    restore(hist[histI]);
+    render();
+  });
+
+  el.clear.addEventListener("click", function () {
+    cells = new Uint8Array(n * n);
+    commit();
+    render();
+  });
+
+  el.board.addEventListener("click", function (e) {
+    const sq = e.target.closest("[data-i]");
+    if (!sq || !el.board.contains(sq)) return;
+    clickCell(parseInt(sq.dataset.i, 10));
+  });
+
+  document.getElementById("load-import").addEventListener("click", function () {
+    const parsed = parseLayout(el.importText.value);
+    if (parsed.error) {
+      el.importMsg.className = "msg bad";
+      el.importMsg.textContent = parsed.error;
+      return;
+    }
+    applyBoard(parsed.n, parsed.rows, "manual");
+    commit();
+    el.importMsg.className = "msg ok";
+    el.importMsg.textContent = "Loaded a " + parsed.n + "×" + parsed.n + " board.";
+    render();
+  });
+
+  document.getElementById("copy-export").addEventListener("click", function () {
+    const text = exportGrid();
+    const done = function () {
+      el.copyMsg.className = "msg ok";
+      el.copyMsg.textContent = "Copied.";
+      setTimeout(function () { el.copyMsg.textContent = ""; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () {
+        el.copyMsg.className = "msg";
+        el.copyMsg.textContent = "Select the grid and copy it.";
+      });
+    } else {
+      el.copyMsg.textContent = "Select the grid and copy it.";
+    }
+  });
+
+  el.recSeg.addEventListener("click", function (e) {
+    const b = e.target.closest("button");
+    if (b && b.dataset.range) {
+      recRange = b.dataset.range;
+      renderRecords();
+    }
+  });
+
+  el.galSeg.addEventListener("click", function (e) {
+    const b = e.target.closest("button");
+    if (b && b.dataset.gal) {
+      galleryFilter = b.dataset.gal;
+      renderGallery();
+    }
+  });
+
+  el.galTable.addEventListener("click", function (e) {
+    const b = e.target.closest("button[data-load]");
+    if (!b) return;
+    const sol = GALLERY.filter(function (s) { return s.id === b.dataset.load; })[0];
+    if (sol) loadSolution(sol);
+  });
+
+  window.PQ_parseLayout = parseLayout;
+  window.PQ_recordFor = recordFor;
+  window.PQ_attacksFromWhite = attacksFromWhite;
+
+  document.addEventListener("keydown", function (e) {
+    const t = e.target;
+    if (t && (t.tagName === "TEXTAREA" || t.tagName === "INPUT" || t.tagName === "SELECT")) return;
+    const key = e.key.toLowerCase();
+    if ((e.metaKey || e.ctrlKey) && key === "z" && !e.shiftKey) {
+      e.preventDefault();
+      el.undo.click();
+    } else if ((e.metaKey || e.ctrlKey) && (key === "y" || (key === "z" && e.shiftKey))) {
+      e.preventDefault();
+      el.redo.click();
+    }
+  });
+})();
+
+  </script>
+</body>
+</html>
