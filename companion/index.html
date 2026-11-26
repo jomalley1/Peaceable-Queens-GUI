@@ -272,6 +272,7 @@ footer { margin-top: 48px; color: var(--muted); font-size: 0.88rem; }
         <button type="button" id="undo">Undo</button>
         <button type="button" id="redo">Redo</button>
         <button type="button" id="clear">Clear</button>
+        <button type="button" id="invert">Invert colors</button>
       </div>
 
       <div id="stats" class="stats"></div>
@@ -369,6 +370,7 @@ window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","gr
     undo: document.getElementById("undo"),
     redo: document.getElementById("redo"),
     clear: document.getElementById("clear"),
+    invert: document.getElementById("invert"),
     board: document.getElementById("board"),
     hint: document.getElementById("hint"),
     stats: document.getElementById("stats"),
@@ -522,6 +524,32 @@ window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","gr
       else if (tool === "B") cells[i] = cells[i] === 2 ? 0 : 2;
       else cells[i] = 0;
     }
+    commit();
+    render();
+  }
+
+  function visibleCells() {
+    const shown = new Uint8Array(cells);
+    if (mode === "auto") {
+      const att = attacksFromWhite(n, cells);
+      for (let i = 0; i < shown.length; i++) {
+        if (shown[i] !== 1) shown[i] = att[i] ? 0 : 2;
+      }
+    }
+    return shown;
+  }
+
+  function invertColors() {
+    const shown = visibleCells();
+    const next = new Uint8Array(shown.length);
+    for (let i = 0; i < shown.length; i++) {
+      if (shown[i] === 1) next[i] = 2;
+      else if (shown[i] === 2) next[i] = 1;
+    }
+    cells = next;
+    // Auto-black would recompute B from the new whites and may not keep
+    // the exact swapped layout, so the result is a manual placement.
+    mode = "manual";
     commit();
     render();
   }
@@ -922,6 +950,10 @@ window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","gr
     render();
   });
 
+  el.invert.addEventListener("click", function () {
+    invertColors();
+  });
+
   el.board.addEventListener("click", function (e) {
     const sq = e.target.closest("[data-i]");
     if (!sq || !el.board.contains(sq)) return;
@@ -983,6 +1015,8 @@ window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","gr
   });
 
   window.PQ_parseLayout = parseLayout;
+  window.PQ_invertColors = invertColors;
+  window.PQ_visibleCells = visibleCells;
   window.PQ_recordFor = recordFor;
   window.PQ_attacksFromWhite = attacksFromWhite;
 
