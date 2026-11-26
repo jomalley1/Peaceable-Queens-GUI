@@ -166,8 +166,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 #board .sq.lt { background: var(--light-sq); }
 #board .sq.dk { background: var(--dark-sq); }
-#board .sq.cleared { background: var(--cleared); }
-#board .sq.conflict { background: var(--danger-bg); box-shadow: inset 0 0 0 2px var(--danger); }
+/* keep-checkered: squares never drop lt/dk */
+#board .sq.conflict { box-shadow: inset 0 0 0 2px var(--danger); }
 #board .piece {
   width: 72%;
   height: 72%;
@@ -745,7 +745,6 @@ window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","gr
         else kind = cells[i];
         const conflict = a.conflicts.has(i);
         let cls = "sq " + (light ? "lt" : "dk");
-        if (mode === "auto" && kind === 0) cls += " cleared";
         if (conflict) cls += " conflict";
         d.className = cls;
         if (kind === 1 || kind === 2) {
@@ -774,7 +773,7 @@ window.PQ_GALLERY = [{"id":"n3","n":3,"w":1,"b":2,"source":"Verified search","gr
       '<div class="stat ' + cmp.tone + '"><div class="k">Vs record</div><div class="v" style="font-size:1.05rem;line-height:1.3">' +
       cmp.text + '</div><div class="d">' + recNote + "</div></div>";
     el.hint.textContent = mode === "auto"
-      ? "Click a square to place a white queen; click it again to remove it. Attacked squares are cleared. Black fills every safe square."
+      ? "Click a square to place a white queen; click it again to remove it. Black fills every safe square."
       : "Place white and black queens explicitly. Squares where opposite queens attack each other are highlighted.";
   }
 
